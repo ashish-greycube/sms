@@ -79,34 +79,20 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"*": {
+		"on_update": "sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"sms.tasks.all"
-# 	],
-# 	"daily": [
-# 		"sms.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"sms.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"sms.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"sms.tasks.monthly"
-# 	]
-# }
+scheduler_events = {
+	"daily": [
+        "sms.sms.doctype.sms_notification.sms_notification.trigger_daily_alerts",
+	]
+}
 
 # Testing
 # -------

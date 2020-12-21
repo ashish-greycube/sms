@@ -7,7 +7,6 @@ import frappe
 import json, os
 from frappe import _
 from frappe.model.document import Document
-from frappe.core.doctype.role.role import get_info_based_on_role, get_user_info
 from frappe.utils import validate_email_address, nowdate, parse_val, is_html, add_to_date
 from frappe.utils.jinja import validate_template
 from frappe.utils.safe_exec import get_safe_globals
@@ -153,59 +152,12 @@ def get_context(context):
 
 
 	def send_sms(self, doc, context):
+		print('-'*10,send_sms)
 		send_sms(
 			receiver_list=self.get_receiver_list(doc, context),
 			msg=frappe.render_template(self.message, context)
 		)
 
-	def get_list_of_recipients(self, doc, context):
-		recipients = []
-		cc = []
-		bcc = []
-		for recipient in self.recipients:
-			if recipient.condition:
-				if not frappe.safe_eval(recipient.condition, None, context):
-					continue
-			if recipient.receiver_by_document_field:
-				fields = recipient.receiver_by_document_field.split(',')
-				# fields from child table
-				if len(fields) > 1:
-					for d in doc.get(fields[1]):
-						email_id = d.get(fields[0])
-						if validate_email_address(email_id):
-							recipients.append(email_id)
-				# field from parent doc
-				else:
-					email_ids_value = doc.get(fields[0])
-					if validate_email_address(email_ids_value):
-						email_ids = email_ids_value.replace(",", "\n")
-						recipients = recipients + email_ids.split("\n")
-
-			if recipient.cc and "{" in recipient.cc:
-				recipient.cc = frappe.render_template(recipient.cc, context)
-
-			if recipient.cc:
-				recipient.cc = recipient.cc.replace(",", "\n")
-				cc = cc + recipient.cc.split("\n")
-
-			if recipient.bcc and "{" in recipient.bcc:
-				recipient.bcc = frappe.render_template(recipient.bcc, context)
-
-			if recipient.bcc:
-				recipient.bcc = recipient.bcc.replace(",", "\n")
-				bcc = bcc + recipient.bcc.split("\n")
-
-			#For sending emails to specified role
-			if recipient.receiver_by_role:
-				emails = get_info_based_on_role(recipient.receiver_by_role, 'email')
-
-				for email in emails:
-					recipients = recipients + email.split("\n")
-
-		if self.send_to_all_assignees:
-			recipients = recipients + get_assignees(doc)
-
-		return list(set(recipients)), list(set(cc)), list(set(bcc))
 
 	def get_receiver_list(self, doc, context):
 		''' return receiver list based on the doc field and role specified '''
@@ -264,7 +216,54 @@ def get_documents_for_today(notification):
 def trigger_daily_alerts():
 	trigger_notifications(None, "daily")
 
+
+def trigger_hook_events(self,method):
+	# from sms.sms.doctype.sms_notification.sms_notification import evaluate_alert
+		"""Run notifications for this method"""
+		if (frappe.flags.in_import and frappe.flags.mute_emails) or frappe.flags.in_patch or frappe.flags.in_install:
+			return
+
+		if self.flags.notifications_executed==None:
+			self.flags.notifications_executed = []
+
+		# from frappe.email.doctype.notification.notification import evaluate_alert
+
+		if self.flags.notifications == None:
+			alerts = frappe.cache().hget('sms_notifications', self.doctype)
+			if alerts==None:
+				alerts = frappe.get_all('SMS Notification', fields=['name', 'event', 'method'],
+					filters={'enabled': 1, 'document_type': self.doctype})
+				frappe.cache().hset('sms_notifications', self.doctype, alerts)
+			self.flags.notifications = alerts
+
+		if not self.flags.notifications:
+			return
+
+		def _evaluate_alert(alert):
+			if not alert.name in self.flags.notifications_executed:
+				evaluate_alert(self, alert.name, alert.event)
+				self.flags.notifications_executed.append(alert.name)
+
+		event_map = {
+			"on_update": "Save",
+			"after_insert": "New",
+			"on_submit": "Submit",
+			"on_cancel": "Cancel"
+		}
+
+		if not self.flags.in_insert:
+			# value change is not applicable in insert
+			event_map['on_change'] = 'Value Change'
+
+		for alert in self.flags.notifications:
+			event = event_map.get(method, None)
+			if event and alert.event == event:
+				_evaluate_alert(alert)
+			elif alert.event=='Method' and method == alert.method:
+				_evaluate_alert(alert)
+
 def trigger_notifications(doc, method=None):
+	print('inside'*100)
 	if frappe.flags.in_import or frappe.flags.in_patch:
 		# don't send notifications while syncing or patching
 		return
@@ -276,6 +275,7 @@ def trigger_notifications(doc, method=None):
 				'enabled': 1
 			})
 		for d in doc_list:
+			print(d.name,'d.name')
 			alert = frappe.get_doc("SMS Notification", d.name)
 
 			for doc in alert.get_documents_for_today():
@@ -287,6 +287,7 @@ def evaluate_alert(doc, alert, event):
 	try:
 		if isinstance(alert, string_types):
 			alert = frappe.get_doc("SMS Notification", alert)
+			print('--'*100,alert.name)
 
 		context = get_context(doc)
 
@@ -313,6 +314,7 @@ def evaluate_alert(doc, alert, event):
 			# except for validate type event.
 			doc.reload()
 		alert.send(doc)
+		print('-alert'*10,alert.name)
 	except TemplateError:
 		frappe.throw(_("Error while evaluating SMS Notification {0}. Please fix your template.").format(alert))
 	except Exception as e:
@@ -331,3 +333,21 @@ def get_assignees(doc):
 	recipients = [d.owner for d in assignees]
 
 	return recipients
+
+
+
+def get_info_based_on_role(role, field='email'):
+	''' Get information of all users that have been assigned this role '''
+	users = frappe.get_list("Has Role", filters={"role": role, "parenttype": "User"},
+		fields=["parent"])
+
+	return get_user_info(users, field)
+
+def get_user_info(users, field='email'):
+	''' Fetch details about users for the specified field '''
+	info_list = []
+	for user in users:
+		user_info, enabled = frappe.db.get_value("User", user.parent, [field, "enabled"])
+		if enabled and user_info not in ["admin@example.com", "guest@example.com"]:
+			info_list.append(user_info)
+	return info_list
