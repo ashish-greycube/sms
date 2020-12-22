@@ -153,6 +153,8 @@ def get_context(context):
 
 	def send_sms(self, doc, context):
 		print('-'*10,send_sms)
+		print('send_sms'*10,'self.nam, doc.name, context',self.name, doc.name, context)
+		print('self.get_receiver_list(doc, context)',self.get_receiver_list(doc, context))		
 		send_sms(
 			receiver_list=self.get_receiver_list(doc, context),
 			msg=frappe.render_template(self.message, context)
@@ -218,7 +220,7 @@ def trigger_daily_alerts():
 
 
 def trigger_hook_events(self,method):
-	# from sms.sms.doctype.sms_notification.sms_notification import evaluate_alert
+		print('inside'*100,len(self.flags.notifications) == 0)
 		"""Run notifications for this method"""
 		if (frappe.flags.in_import and frappe.flags.mute_emails) or frappe.flags.in_patch or frappe.flags.in_install:
 			return
@@ -228,19 +230,21 @@ def trigger_hook_events(self,method):
 
 		# from frappe.email.doctype.notification.notification import evaluate_alert
 
-		if self.flags.notifications == None:
-			alerts = frappe.cache().hget('sms_notifications', self.doctype)
-			if alerts==None:
+		if len(self.flags.notifications) == 0:
+			alerts = frappe.cache().hget('notifications', self.doctype)
+			print(alerts,'alerts')
+			if len(alerts)==0:
 				alerts = frappe.get_all('SMS Notification', fields=['name', 'event', 'method'],
 					filters={'enabled': 1, 'document_type': self.doctype})
-				frappe.cache().hset('sms_notifications', self.doctype, alerts)
+				frappe.cache().hset('notifications', self.doctype, alerts)
 			self.flags.notifications = alerts
-
+		print('self.flags.notifications',self.flags.notifications,'self.flags.notifications_executed',self.flags.notifications_executed)
 		if not self.flags.notifications:
 			return
 
 		def _evaluate_alert(alert):
 			if not alert.name in self.flags.notifications_executed:
+				print('3evaluate_alert'*10,'alert.name, alert.event',alert.name, alert.event)
 				evaluate_alert(self, alert.name, alert.event)
 				self.flags.notifications_executed.append(alert.name)
 
@@ -258,8 +262,10 @@ def trigger_hook_events(self,method):
 		for alert in self.flags.notifications:
 			event = event_map.get(method, None)
 			if event and alert.event == event:
+				print('1_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
 				_evaluate_alert(alert)
 			elif alert.event=='Method' and method == alert.method:
+				print('2_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
 				_evaluate_alert(alert)
 
 def trigger_notifications(doc, method=None):

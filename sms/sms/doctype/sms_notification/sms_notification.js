@@ -1,7 +1,8 @@
 // Copyright (c) 2018, Frappe Technologies and contributors
 // For license information, please see license.txt
 
-frappe.notification = {
+
+frappe.sms_notification = {
 	setup_fieldname_select: function(frm) {
 		// get the doctype to update fields
 		if (!frm.doc.document_type) {
@@ -50,33 +51,17 @@ frappe.notification = {
 			frm.set_df_property('date_changed', 'options', get_date_change_options());
 
 			let receiver_fields = [];
-			if (frm.doc.channel === 'Email') {
+			 if (in_list(['SMS'], frm.doc.channel)) {
 				receiver_fields = $.map(fields, function(d) {
-
-					// Add User and Email fields from child into select dropdown
-					if (d.fieldtype == 'Table') {
-						let child_fields = frappe.get_doc('DocType', d.options).fields;
-						return $.map(child_fields, function(df) {
-							return df.options == 'Email' ||
-								(df.options == 'User' && df.fieldtype == 'Link')
-								? get_select_options(df, d.fieldname) : null;
-						});
-					// Add User and Email fields from parent into select dropdown
-					} else {
-						return d.options == 'Email' ||
-							(d.options == 'User' && d.fieldtype == 'Link')
-							? get_select_options(d) : null;
-					}
-				});
-			} else if (in_list(['WhatsApp', 'SMS'], frm.doc.channel)) {
-				receiver_fields = $.map(fields, function(d) {
+					console.log('d.options',d.options)
 					return d.options == 'Phone' ? get_select_options(d) : null;
 				});
 			}
-
+			console.log('fields',fields)
+			console.log('receiver_fields',receiver_fields)
 			// set email recipient options
 			frappe.meta.get_docfield(
-				'Notification Recipient',
+				'SMS Notification Recipient',
 				'receiver_by_document_field',
 				// set first option as blank to allow notification not to be defaulted to the owner
 				frm.doc.name
@@ -87,7 +72,6 @@ frappe.notification = {
 	},
 	setup_example_message: function(frm) {
 		let template = '';
-
 			template = `<h5>Message Example</h5>
 
 <pre>*Order Overdue*
@@ -127,13 +111,13 @@ frappe.ui.form.on('SMS Notification', {
 		});
 	},
 	refresh: function(frm) {
-		frappe.notification.setup_fieldname_select(frm);
-		frappe.notification.setup_example_message(frm);
+		frappe.sms_notification.setup_fieldname_select(frm);
+		frappe.sms_notification.setup_example_message(frm);
 		frm.get_field('is_standard').toggle(frappe.boot.developer_mode);
 		frm.trigger('event');
 	},
 	document_type: function(frm) {
-		frappe.notification.setup_fieldname_select(frm);
+		frappe.sms_notification.setup_fieldname_select(frm);
 	},
 	view_properties: function(frm) {
 		frappe.route_options = { doc_type: frm.doc.document_type };
@@ -144,7 +128,7 @@ frappe.ui.form.on('SMS Notification', {
 			frm.add_custom_button(__('Get Alerts for Today'), function() {
 				frappe.call({
 					method:
-						'frappe.email.doctype.notification.notification.get_documents_for_today',
+						'sms.sms.doctype.sms_notification.sms_notification.get_documents_for_today',
 					args: {
 						notification: frm.doc.name
 					},
@@ -160,8 +144,8 @@ frappe.ui.form.on('SMS Notification', {
 		}
 	},
 	channel: function(frm) {
-		frappe.notification.setup_fieldname_select(frm);
-		frappe.notification.setup_example_message(frm);
+		frappe.sms_notification.setup_fieldname_select(frm);
+		frappe.sms_notification.setup_example_message(frm);
 		if (frm.doc.channel === 'SMS' && frm.doc.__islocal) {
 			frm.set_df_property('channel',
 				'description', `To use SMS Channel, initialize <a href="#Form/SMS Settings">SMS Settings</a>.`);

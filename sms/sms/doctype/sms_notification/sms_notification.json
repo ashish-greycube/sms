@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2020-12-21 04:37:46.221248",
@@ -73,8 +72,7 @@
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
    "in_list_view": 1,
-   "label": "Subject",
-   "mandatory_depends_on": "eval:!in_list(['SMS', 'WhatsApp'], doc.channel)"
+   "label": "Subject"
   },
   {
    "fieldname": "document_type",
@@ -205,8 +203,8 @@
    "fieldname": "recipients",
    "fieldtype": "Table",
    "label": "Recipients",
-   "mandatory_depends_on": "eval:doc.channel!=='Slack' && !doc.send_to_all_assignees",
-   "options": "Notification Recipient"
+   "options": "SMS Notification Recipient",
+   "reqd": 1
   },
   {
    "fieldname": "message_sb",
@@ -253,9 +251,7 @@
   }
  ],
  "icon": "fa fa-envelope",
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2020-12-21 06:15:14.431643",
+ "modified": "2020-12-22 12:45:08.037097",
  "modified_by": "Administrator",
  "module": "Sms",
  "name": "SMS Notification",
