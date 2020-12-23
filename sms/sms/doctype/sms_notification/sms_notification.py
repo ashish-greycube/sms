@@ -35,7 +35,7 @@ class SMSNotification(Document):
 
 		self.validate_forbidden_types()
 		self.validate_condition()
-		frappe.cache().hdel('notifications', self.document_type)
+		frappe.cache().hdel('sms_notifications', self.document_type)
 
 	def on_update(self):
 		path = export_module_json(self, self.is_standard, self.module)
@@ -220,7 +220,8 @@ def trigger_daily_alerts():
 
 
 def trigger_hook_events(self,method):
-		print('inside'*100,len(self.flags.notifications) == 0)
+		print('---'*10,self.flags)
+		# print('inside'*100,len(self.flags.notifications) == 0)
 		"""Run notifications for this method"""
 		if (frappe.flags.in_import and frappe.flags.mute_emails) or frappe.flags.in_patch or frappe.flags.in_install:
 			return
@@ -230,13 +231,13 @@ def trigger_hook_events(self,method):
 
 		# from frappe.email.doctype.notification.notification import evaluate_alert
 
-		if len(self.flags.notifications) == 0:
-			alerts = frappe.cache().hget('notifications', self.doctype)
+		if self.flags.notifications == None:
+			alerts = frappe.cache().hget('sms_notifications', self.doctype)
 			print(alerts,'alerts')
-			if len(alerts)==0:
+			if alerts==None:
 				alerts = frappe.get_all('SMS Notification', fields=['name', 'event', 'method'],
 					filters={'enabled': 1, 'document_type': self.doctype})
-				frappe.cache().hset('notifications', self.doctype, alerts)
+				frappe.cache().hset('sms_notifications', self.doctype, alerts)
 			self.flags.notifications = alerts
 		print('self.flags.notifications',self.flags.notifications,'self.flags.notifications_executed',self.flags.notifications_executed)
 		if not self.flags.notifications:
