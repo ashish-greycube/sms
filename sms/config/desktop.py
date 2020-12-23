@@ -7,8 +7,8 @@ def get_data():
 		{
 			"module_name": "Sms",
 			"color": "red",
-			"icon": "octicon comment-discussion",
+			"icon": "fa fa-bell",
 			"type": "module",
-			"label": _("Sms")
+			"label": _("SMS")
 		}
 	]

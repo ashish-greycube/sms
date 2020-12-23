@@ -6,7 +6,7 @@ app_name = "sms"
 app_title = "Sms"
 app_publisher = "GreyCube Technologies"
 app_description = "send sms from any doctype"
-app_icon = "octicon comment-discussion"
+app_icon = "fa fa-bell"
 app_color = "red"
 app_email = "admin@greycube.in"
 app_license = "MIT"
@@ -82,6 +82,9 @@ app_license = "MIT"
 doc_events = {
 	"*": {
 		"on_update": "sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
+        "after_insert":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
+        "on_submit":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
+        "on_cancel":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events"
 	}
 }
 
@@ -113,3 +116,10 @@ scheduler_events = {
 # 	"Task": "sms.task.get_dashboard_data"
 # }
 
+fixtures = [
+      {
+        "dt": "SMS Settings", 
+        "filters": [["name", "in", ["SMS Settings"]]]
+      }      
+
+]

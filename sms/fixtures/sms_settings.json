@@ -1,0 +1,41 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "SMS Settings",
+  "message_parameter": "message",
+  "modified": "2020-05-12 16:34:08.354586",
+  "name": "SMS Settings",
+  "parameters": [
+   {
+    "header": 0,
+    "parameter": "username",
+    "parent": "SMS Settings",
+    "parentfield": "parameters",
+    "parenttype": "SMS Settings",
+    "value": "info@sunfitltd.com"
+   },
+   {
+    "header": 0,
+    "parameter": "password",
+    "parent": "SMS Settings",
+    "parentfield": "parameters",
+    "parenttype": "SMS Settings",
+    "value": "Sunf1tltd1!"
+   },
+   {
+    "header": 0,
+    "parameter": "sender",
+    "parent": "SMS Settings",
+    "parentfield": "parameters",
+    "parenttype": "SMS Settings",
+    "value": "Tripple"
+   }
+  ],
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "receiver_parameter": "mobiles",
+  "sms_gateway_url": "http://login.betasms.com/api/?",
+  "use_post": 1
+ }
+]
