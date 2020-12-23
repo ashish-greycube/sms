@@ -65,8 +65,8 @@ frappe.sms_notification = {
 				'receiver_by_document_field',
 				// set first option as blank to allow notification not to be defaulted to the owner
 				frm.doc.name
-			).options = [''].concat(["owner"]).concat(receiver_fields);
-
+			// ).options = [''].concat(["owner"]).concat(receiver_fields);
+			).options = [''].concat(receiver_fields);
 			frm.fields_dict.recipients.grid.refresh();
 		});
 	},
@@ -102,18 +102,11 @@ frappe.ui.form.on('SMS Notification', {
 				}
 			};
 		});
-		frm.set_query('print_format', function() {
-			return {
-				filters: {
-					doc_type: frm.doc.document_type
-				}
-			};
-		});
 	},
 	refresh: function(frm) {
 		frappe.sms_notification.setup_fieldname_select(frm);
 		frappe.sms_notification.setup_example_message(frm);
-		frm.get_field('is_standard').toggle(frappe.boot.developer_mode);
+		// frm.get_field('is_standard').toggle(frappe.boot.developer_mode);
 		frm.trigger('event');
 	},
 	document_type: function(frm) {

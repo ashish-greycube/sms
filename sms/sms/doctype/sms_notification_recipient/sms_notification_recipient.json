@@ -6,8 +6,6 @@
  "field_order": [
   "receiver_by_document_field",
   "receiver_by_role",
-  "cc",
-  "bcc",
   "condition"
  ],
  "fields": [
@@ -20,32 +18,22 @@
   {
    "fieldname": "receiver_by_role",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Receiver By Role",
    "options": "Role"
   },
   {
-   "description": "Optional: Always send to these ids. Each Email Address on a new row",
-   "fieldname": "cc",
-   "fieldtype": "Code",
-   "in_list_view": 1,
-   "label": "CC"
-  },
-  {
-   "fieldname": "bcc",
-   "fieldtype": "Code",
-   "label": "BCC"
-  },
-  {
    "description": "Expression, Optional",
    "fieldname": "condition",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Condition"
   }
  ],
  "istable": 1,
- "modified": "2020-12-22 12:01:12.706649",
+ "modified": "2020-12-23 05:17:19.898457",
  "modified_by": "Administrator",
  "module": "Sms",
  "name": "SMS Notification Recipient",

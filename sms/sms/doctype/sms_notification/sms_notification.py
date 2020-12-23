@@ -267,6 +267,9 @@ def trigger_hook_events(self,method):
 			elif alert.event=='Method' and method == alert.method:
 				print('2_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
 				_evaluate_alert(alert)
+			elif alert.event=='Value Change' :
+				print('3_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
+				_evaluate_alert(alert)			
 
 def trigger_notifications(doc, method=None):
 	print('inside'*100)
