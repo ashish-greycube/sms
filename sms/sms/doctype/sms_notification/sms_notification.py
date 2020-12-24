@@ -220,57 +220,58 @@ def trigger_daily_alerts():
 
 
 def trigger_hook_events(self,method):
-		print('---'*10,self.flags)
-		# print('inside'*100,len(self.flags.notifications) == 0)
-		"""Run notifications for this method"""
-		if (frappe.flags.in_import and frappe.flags.mute_emails) or frappe.flags.in_patch or frappe.flags.in_install:
-			return
+	# return
+	print('---'*10,self.flags)
+	# print('inside'*100,len(self.flags.sms_notifications) == 0)
+	"""Run notifications for this method"""
+	if (frappe.flags.in_import and frappe.flags.mute_emails) or frappe.flags.in_patch or frappe.flags.in_install:
+		return
 
-		if self.flags.notifications_executed==None:
-			self.flags.notifications_executed = []
+	if self.flags.sms_notifications_executed==None:
+		self.flags.sms_notifications_executed = []
 
-		# from frappe.email.doctype.notification.notification import evaluate_alert
+	# from frappe.email.doctype.notification.notification import evaluate_alert
 
-		if self.flags.notifications == None:
-			alerts = frappe.cache().hget('sms_notifications', self.doctype)
-			print(alerts,'alerts')
-			if alerts==None:
-				alerts = frappe.get_all('SMS Notification', fields=['name', 'event', 'method'],
-					filters={'enabled': 1, 'document_type': self.doctype})
-				frappe.cache().hset('sms_notifications', self.doctype, alerts)
-			self.flags.notifications = alerts
-		print('self.flags.notifications',self.flags.notifications,'self.flags.notifications_executed',self.flags.notifications_executed)
-		if not self.flags.notifications:
-			return
+	if self.flags.sms_notifications == None:
+		alerts = frappe.cache().hget('sms_notifications', self.doctype)
+		print(alerts,'alerts')
+		if alerts==None:
+			alerts = frappe.get_all('SMS Notification', fields=['name', 'event', 'method'],
+				filters={'enabled': 1, 'document_type': self.doctype})
+			frappe.cache().hset('sms_notifications', self.doctype, alerts)
+		self.flags.sms_notifications = alerts
+	print('self.flags.sms_notifications',self.flags.sms_notifications,'self.flags.sms_notifications_executed',self.flags.sms_notifications_executed)
+	if not self.flags.sms_notifications:
+		return
 
-		def _evaluate_alert(alert):
-			if not alert.name in self.flags.notifications_executed:
-				print('3evaluate_alert'*10,'alert.name, alert.event',alert.name, alert.event)
-				evaluate_alert(self, alert.name, alert.event)
-				self.flags.notifications_executed.append(alert.name)
+	def _evaluate_alert(alert):
+		if not alert.name in self.flags.sms_notifications_executed:
+			print('3evaluate_alert'*10,'alert.name, alert.event',alert.name, alert.event)
+			evaluate_alert(self, alert.name, alert.event)
+			self.flags.sms_notifications_executed.append(alert.name)
 
-		event_map = {
-			"on_update": "Save",
-			"after_insert": "New",
-			"on_submit": "Submit",
-			"on_cancel": "Cancel"
-		}
+	event_map = {
+		"on_update": "Save",
+		"after_insert": "New",
+		"on_submit": "Submit",
+		"on_cancel": "Cancel"
+	}
 
-		if not self.flags.in_insert:
-			# value change is not applicable in insert
-			event_map['on_change'] = 'Value Change'
+	if not self.flags.in_insert:
+		# value change is not applicable in insert
+		event_map['on_change'] = 'Value Change'
 
-		for alert in self.flags.notifications:
-			event = event_map.get(method, None)
-			if event and alert.event == event:
-				print('1_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
-				_evaluate_alert(alert)
-			elif alert.event=='Method' and method == alert.method:
-				print('2_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
-				_evaluate_alert(alert)
-			elif alert.event=='Value Change' :
-				print('3_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
-				_evaluate_alert(alert)			
+	for alert in self.flags.sms_notifications:
+		event = event_map.get(method, None)
+		if event and alert.event == event:
+			print('1_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
+			_evaluate_alert(alert)
+		elif alert.event=='Method' and method == alert.method:
+			print('2_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
+			_evaluate_alert(alert)
+		elif alert.event=='Value Change' :
+			print('3_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
+			_evaluate_alert(alert)			
 
 def trigger_notifications(doc, method=None):
 	print('inside'*100)
