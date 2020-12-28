@@ -145,15 +145,7 @@ def get_context(context):
 			except Exception:
 				frappe.log_error(title='Document update failed', message=frappe.get_traceback())
 
-
-
-
-
-
-
 	def send_sms(self, doc, context):
-		print('-'*10,send_sms)
-		print('send_sms'*10,frappe.render_template(self.message, context))
 		send_sms(
 			receiver_list=self.get_receiver_list(doc, context),
 			msg=frappe.render_template(self.message, context)
