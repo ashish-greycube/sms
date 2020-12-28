@@ -153,8 +153,7 @@ def get_context(context):
 
 	def send_sms(self, doc, context):
 		print('-'*10,send_sms)
-		print('send_sms'*10,'self.nam, doc.name, context',self.name, doc.name, context)
-		print('self.get_receiver_list(doc, context)',self.get_receiver_list(doc, context))		
+		print('send_sms'*10,frappe.render_template(self.message, context))
 		send_sms(
 			receiver_list=self.get_receiver_list(doc, context),
 			msg=frappe.render_template(self.message, context)
@@ -221,8 +220,6 @@ def trigger_daily_alerts():
 
 def trigger_hook_events(self,method):
 	# return
-	print('---'*10,self.flags)
-	# print('inside'*100,len(self.flags.sms_notifications) == 0)
 	"""Run notifications for this method"""
 	if (frappe.flags.in_import and frappe.flags.mute_emails) or frappe.flags.in_patch or frappe.flags.in_install:
 		return
@@ -234,19 +231,16 @@ def trigger_hook_events(self,method):
 
 	if self.flags.sms_notifications == None:
 		alerts = frappe.cache().hget('sms_notifications', self.doctype)
-		print(alerts,'alerts')
 		if alerts==None:
 			alerts = frappe.get_all('SMS Notification', fields=['name', 'event', 'method'],
 				filters={'enabled': 1, 'document_type': self.doctype})
 			frappe.cache().hset('sms_notifications', self.doctype, alerts)
 		self.flags.sms_notifications = alerts
-	print('self.flags.sms_notifications',self.flags.sms_notifications,'self.flags.sms_notifications_executed',self.flags.sms_notifications_executed)
 	if not self.flags.sms_notifications:
 		return
 
 	def _evaluate_alert(alert):
 		if not alert.name in self.flags.sms_notifications_executed:
-			print('3evaluate_alert'*10,'alert.name, alert.event',alert.name, alert.event)
 			evaluate_alert(self, alert.name, alert.event)
 			self.flags.sms_notifications_executed.append(alert.name)
 
@@ -264,17 +258,13 @@ def trigger_hook_events(self,method):
 	for alert in self.flags.sms_notifications:
 		event = event_map.get(method, None)
 		if event and alert.event == event:
-			print('1_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
 			_evaluate_alert(alert)
 		elif alert.event=='Method' and method == alert.method:
-			print('2_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
 			_evaluate_alert(alert)
 		elif alert.event=='Value Change' :
-			print('3_evaluate_alert'*100,'alert',alert,'alert.name',alert.name)
 			_evaluate_alert(alert)			
 
 def trigger_notifications(doc, method=None):
-	print('inside'*100)
 	if frappe.flags.in_import or frappe.flags.in_patch:
 		# don't send notifications while syncing or patching
 		return
@@ -286,7 +276,6 @@ def trigger_notifications(doc, method=None):
 				'enabled': 1
 			})
 		for d in doc_list:
-			print(d.name,'d.name')
 			alert = frappe.get_doc("SMS Notification", d.name)
 
 			for doc in alert.get_documents_for_today():
@@ -298,7 +287,6 @@ def evaluate_alert(doc, alert, event):
 	try:
 		if isinstance(alert, string_types):
 			alert = frappe.get_doc("SMS Notification", alert)
-			print('--'*100,alert.name)
 
 		context = get_context(doc)
 
@@ -325,7 +313,6 @@ def evaluate_alert(doc, alert, event):
 			# except for validate type event.
 			doc.reload()
 		alert.send(doc)
-		print('-alert'*10,alert.name)
 	except TemplateError:
 		frappe.throw(_("Error while evaluating SMS Notification {0}. Please fix your template.").format(alert))
 	except Exception as e:
