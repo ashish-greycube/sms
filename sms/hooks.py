@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from . import __version__ as app_version
 
 app_name = "sms"
-app_title = "Sms"
+app_title = "Communication"
 app_publisher = "GreyCube Technologies"
 app_description = "send sms from any doctype"
 app_icon = "fa fa-bell"
@@ -81,7 +81,7 @@ app_license = "MIT"
 
 doc_events = {
 	"*": {
-		"on_update": "sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
+	"on_update": "sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
         "after_insert":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
         "on_submit":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
         "on_cancel":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events"
@@ -94,7 +94,25 @@ doc_events = {
 scheduler_events = {
 	"daily": [
         "sms.sms.doctype.sms_notification.sms_notification.trigger_daily_alerts",
-	]
+	],
+"cron": {
+        "30 6 1 */3 *": [
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_every_3_months_sms",
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_every_3_months_email"
+        ],
+        "30 6 1 */2 *": [
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_every_2_months_sms",
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_every_2_months_email"
+        ],        
+        "30 6 1,15 * *": [
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_every_15_days_sms",
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_every_15_days_email"
+        ],
+        "30 6 25 * *": [
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_25th_of_every_month_sms",
+            "sms.sms.doctype.sms_notification.sms_notification.trigger_25th_of_every_month_email"
+        ]
+    }        
 }
 
 # Testing

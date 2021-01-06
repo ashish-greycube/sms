@@ -256,6 +256,39 @@ def trigger_hook_events(self,method):
 		elif alert.event=='Value Change' :
 			_evaluate_alert(alert)			
 
+def get_documents_for_processing(self):
+	'''get list of documents that will be triggered today'''
+	docs = []
+
+	diff_days = self.days_in_advance
+	if self.event=="Condition Days After":
+		diff_days = -diff_days
+
+	reference_date = add_to_date(nowdate(), days=diff_days)
+	reference_date_start = reference_date + ' 00:00:00.000000'
+	reference_date_end = nowdate() + ' 23:59:59.000000'
+
+	doc_list = frappe.get_all(self.document_type,
+		fields='name',
+		filters=[
+			{ self.date_changed: ('<=', reference_date_start) },
+			{ self.date_changed: ('not in', [None,'']) }
+		])
+	print(doc_list,'doclist',self.document_type,self.date_changed,reference_date_start,reference_date_end)
+	for d in doc_list:
+		doc = frappe.get_doc(self.document_type, d.name)
+
+		if self.condition and not frappe.safe_eval(self.condition, None, get_context(doc)):
+			continue
+
+		docs.append(doc)
+
+	return docs
+
+
+
+
+
 def trigger_notifications(doc, method=None):
 	if frappe.flags.in_import or frappe.flags.in_patch:
 		# don't send notifications while syncing or patching
@@ -267,6 +300,7 @@ def trigger_notifications(doc, method=None):
 				'event': ('in', ('Days Before', 'Days After')),
 				'enabled': 1
 			})
+		print('daily doc',doc_list)
 		for d in doc_list:
 			alert = frappe.get_doc("SMS Notification", d.name)
 
@@ -341,3 +375,75 @@ def get_user_info(users, field='email'):
 		if enabled and user_info not in ["admin@example.com", "guest@example.com"]:
 			info_list.append(user_info)
 	return info_list
+
+
+	
+
+
+def trigger_repeat_sms_with_condition(condition):
+	if frappe.flags.in_import or frappe.flags.in_patch:
+		# don't send notifications while syncing or patching
+		return
+
+	doc_list = frappe.get_all('SMS Notification',
+		filters={
+			'event': 'Condition Days After',
+			'interval':condition,
+			'enabled': 1
+		})
+	for d in doc_list:
+		alert = frappe.get_doc("SMS Notification", d.name)
+		print(d.name,'alert selected')
+		for doc in get_documents_for_processing(alert):
+			print(doc.name,'doc impacted')
+			evaluate_alert(doc, alert, alert.event)
+			frappe.db.commit()	
+
+def trigger_repeat_email_with_condition(condition):			
+	from frappe.email.doctype.notification.notification import evaluate_alert
+	if frappe.flags.in_import or frappe.flags.in_patch:
+		# don't send notifications while syncing or patching
+		return
+
+	doc_list = frappe.get_all('Notification',
+		filters={
+			'event': 'Condition Days After',
+			'interval':condition,
+			'enabled': 1
+		})
+	for d in doc_list:
+		alert = frappe.get_doc("Notification", d.name)
+		print(d.name,'alert selected')
+		for doc in get_documents_for_processing(alert):
+			print(doc.name,'doc impacted')
+			evaluate_alert(doc, alert, alert.event)
+			frappe.db.commit()	
+
+def trigger_every_3_months_sms():
+	trigger_repeat_sms_with_condition(condition='Every 3 months')
+
+
+def trigger_every_3_months_email():
+	trigger_repeat_email_with_condition(condition='Every 3 months')			
+
+def trigger_every_2_months_sms():
+	trigger_repeat_sms_with_condition(condition='Every 2 months')
+
+
+def trigger_every_2_months_email():
+	trigger_repeat_email_with_condition(condition='Every 2 months')			
+
+def trigger_every_15_days_sms():
+	trigger_repeat_sms_with_condition(condition='Every 15 days')
+
+
+def trigger_every_15_days_email():
+	trigger_repeat_email_with_condition(condition='Every 15 days')		
+
+
+def trigger_25th_of_every_month_sms():
+	trigger_repeat_sms_with_condition(condition='25th of every month')
+
+
+def trigger_25th_of_every_month_email():
+	trigger_repeat_email_with_condition(condition='25th of every month')	

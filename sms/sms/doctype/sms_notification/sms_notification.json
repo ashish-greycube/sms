@@ -19,6 +19,7 @@
   "method",
   "date_changed",
   "days_in_advance",
+  "interval",
   "value_changed",
   "send_system_notification",
   "column_break_5",
@@ -105,7 +106,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Send Alert On",
-   "options": "\nNew\nSave\nSubmit\nCancel\nDays After\nDays Before\nValue Change\nMethod\nCustom",
+   "options": "\nNew\nSave\nSubmit\nCancel\nDays After\nDays Before\nValue Change\nMethod\nCustom\nCondition Days After",
    "reqd": 1,
    "search_index": 1
   },
@@ -117,7 +118,7 @@
    "label": "Trigger Method"
   },
   {
-   "depends_on": "eval:doc.document_type && (doc.event==\"Days After\" || doc.event==\"Days Before\")",
+   "depends_on": "eval:doc.document_type && (doc.event==\"Days After\" || doc.event==\"Days Before\" || doc.event==\"Condition Days After\")",
    "description": "Send alert if date matches this field's value",
    "fieldname": "date_changed",
    "fieldtype": "Select",
@@ -125,7 +126,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.document_type && (doc.event==\"Days After\" || doc.event==\"Days Before\")",
+   "depends_on": "eval:doc.document_type && (doc.event==\"Days After\" || doc.event==\"Days Before\" || doc.event==\"Condition Days After\")",
    "description": "Send days before or after the reference date",
    "fieldname": "days_in_advance",
    "fieldtype": "Int",
@@ -220,10 +221,17 @@
    "fieldname": "view_properties",
    "fieldtype": "Button",
    "label": "View Properties (via Customize Form)"
+  },
+  {
+   "depends_on": "eval: doc.event=='Condition Days After'",
+   "fieldname": "interval",
+   "fieldtype": "Select",
+   "label": "Interval",
+   "options": "\nEvery 15 days\nEvery 2 months\nEvery 3 months\n25th of every month"
   }
  ],
  "icon": "fa fa-envelope",
- "modified": "2020-12-23 05:34:14.453776",
+ "modified": "2021-01-06 09:51:50.339877",
  "modified_by": "Administrator",
  "module": "Sms",
  "name": "SMS Notification",
