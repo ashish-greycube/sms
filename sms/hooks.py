@@ -88,7 +88,7 @@ doc_events = {
 	},
     "Payment Entry":{
         "on_submit":"sms.sms.doctype.sms_notification.sms_notification.membership_creation_renewal",
-    }
+    } 
 }
 
 # Scheduled Tasks
@@ -97,6 +97,7 @@ doc_events = {
 scheduler_events = {
 	"daily": [
         "sms.sms.doctype.sms_notification.sms_notification.trigger_daily_alerts",
+        "sms.sms.doctype.sms_notification.sms_notification.birthday_reminders",
 	],
 "cron": {
         "30 6 1 */3 *": [

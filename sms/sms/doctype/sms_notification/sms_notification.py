@@ -476,50 +476,100 @@ def membership_creation_renewal(self,method):
 						send_membership_creation_renewal_sms(self,notification_name='membership_active',args=args)
 						send_membership_creation_renewal_email(self,notification_name='membership_active',args=args)
 
-def send_membership_creation_renewal_sms(self,notification_name,args):
-	alert = frappe.get_doc('SMS Notification',notification_name)
-	if alert:
-		doc=frappe.get_doc(self.doctype,self.name)
-		context = get_context(doc)
-		context = {"doc": doc, "alert": alert, "comments": None}
-		msg=frappe.render_template(alert.message,context)
-		msg=frappe.render_template(msg, args)	
-		send_sms(
-			receiver_list=alert.get_receiver_list(doc, context),
-			msg=msg
-		)	
+def send_membership_creation_renewal_sms(self,notification_name,args=None):
+	if frappe.db.exists('SMS Notification',notification_name):	
+		alert = frappe.get_doc('SMS Notification',notification_name)
+		if alert:
+			doc=frappe.get_doc(self.doctype,self.name)
+			context = get_context(doc)
+			context = {"doc": doc, "alert": alert, "comments": None}
+			msg=frappe.render_template(alert.message,context)
+			if args !=None:
+				msg=frappe.render_template(msg, args)
+			print(alert.get_receiver_list(doc, context),len(alert.get_receiver_list(doc, context)))	
+			receiver_list=list(filter(None,alert.get_receiver_list(doc, context)))
+			if len(receiver_list)>0:
+				send_sms(
+					receiver_list=receiver_list,
+					msg=msg
+				)
+				print('msg sent',alert.get_receiver_list(doc, context),msg)	
 
 def send_membership_creation_renewal_email(self,notification_name,args):
-	alert = frappe.get_doc('Notification',notification_name)
-	if alert:
-		doc=frappe.get_doc(self.doctype,self.name)
-		context = get_context(doc)
-		context = {"doc": doc, "alert": alert, "comments": None}
+	if frappe.db.exists('Notification',notification_name):	
+		alert = frappe.get_doc('Notification',notification_name)
+		if alert:
+			doc=frappe.get_doc(self.doctype,self.name)
+			context = get_context(doc)
+			context = {"doc": doc, "alert": alert, "comments": None}
 
-		from email.utils import formataddr
-		subject = alert.subject
-		if "{" in subject:
-			subject = frappe.render_template(alert.subject, context)
+			from email.utils import formataddr
+			subject = alert.subject
+			if "{" in subject:
+				subject = frappe.render_template(alert.subject, context)
 
-		attachments = alert.get_attachment(doc)
-		recipients, cc, bcc = alert.get_list_of_recipients(doc, context)
-		if not (recipients or cc or bcc):
-			return
+			attachments = alert.get_attachment(doc)
+			recipients, cc, bcc = alert.get_list_of_recipients(doc, context)
+			if not (recipients or cc or bcc):
+				return
 
-		sender = None
-		if alert.sender and alert.sender_email:
-			sender = formataddr((alert.sender, alert.sender_email))
-		msg=frappe.render_template(alert.message,context)
-		msg=frappe.render_template(msg, args)				
-		frappe.sendmail(recipients = recipients,
-			subject = subject,
-			sender = sender,
-			cc = cc,
-			bcc = bcc,
-			message = msg,
-			reference_doctype = doc.doctype,
-			reference_name = doc.name,
-			attachments = attachments,
-			expose_recipients="header",
-			print_letterhead = ((attachments
-				and attachments[0].get('print_letterhead')) or False))
+			sender = None
+			if alert.sender and alert.sender_email:
+				sender = formataddr((alert.sender, alert.sender_email))
+			msg=frappe.render_template(alert.message,context)
+			if args !=None:
+				msg=frappe.render_template(msg, args)			
+			frappe.sendmail(recipients = recipients,
+				subject = subject,
+				sender = sender,
+				cc = cc,
+				bcc = bcc,
+				message = msg,
+				reference_doctype = doc.doctype,
+				reference_name = doc.name,
+				attachments = attachments,
+				expose_recipients="header",
+				print_letterhead = ((attachments
+					and attachments[0].get('print_letterhead')) or False))
+
+def birthday_reminders():
+	print('-'*100)
+	"""Get  whose birthday is today for SMS"""
+	todays_date=frappe.utils.today()
+	contacts = frappe.db.sql("""
+select distinct(contact.name)
+from `tabMembership CT` membership
+inner join `tabDynamic Link` link
+on link.link_name=membership.customer
+inner join `tabContact` contact 
+on contact.name=link.parent
+where 
+link.parenttype='Contact' and link.link_doctype='Customer'
+and membership.status in ('Active Unpaid','Active Paid','Past Due Date','Suspended')
+and contact.mobile_no is not null
+and DATE_FORMAT(contact.birth_date_cf,'%%m-%%d') = DATE_FORMAT(%s,'%%m-%%d')
+""",(todays_date),as_dict=1)
+	if len(contacts)>0:
+		for contact in contacts:
+			print(contact.name)
+			doc=frappe.get_doc('Contact',contact.name)
+			send_membership_creation_renewal_sms(doc,notification_name='birthday_reminder',args=None)
+			# 
+	contacts = frappe.db.sql("""
+select distinct(contact.name)
+from `tabMembership CT` membership
+inner join `tabDynamic Link` link
+on link.link_name=membership.customer
+inner join `tabContact` contact 
+on contact.name=link.parent
+where 
+link.parenttype='Contact' and link.link_doctype='Customer'
+and membership.status in ('Active Unpaid','Active Paid','Past Due Date','Suspended')
+and contact.email_id is not null
+and DATE_FORMAT(contact.birth_date_cf,'%%m-%%d') = DATE_FORMAT(%s,'%%m-%%d')
+""",(todays_date),as_dict=1)
+	if len(contacts)>0:
+		for contact in contacts:
+			print(contact.name)
+			doc=frappe.get_doc('Contact',contact.name)
+			send_membership_creation_renewal_email(doc,notification_name='birthday_reminder',args=None)		
