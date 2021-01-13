@@ -85,7 +85,10 @@ doc_events = {
         "after_insert":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
         "on_submit":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events",
         "on_cancel":"sms.sms.doctype.sms_notification.sms_notification.trigger_hook_events"
-	}
+	},
+    "Payment Entry":{
+        "on_submit":"sms.sms.doctype.sms_notification.sms_notification.membership_creation_renewal",
+    }
 }
 
 # Scheduled Tasks

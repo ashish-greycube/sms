@@ -447,3 +447,79 @@ def trigger_25th_of_every_month_sms():
 
 def trigger_25th_of_every_month_email():
 	trigger_repeat_email_with_condition(condition='25th of every month')	
+
+
+def membership_creation_renewal(self,method):
+	for reference in self.get("references"):
+		if reference.reference_doctype == 'Sales Invoice':
+			sales_invoice=reference.reference_name
+			membership_detail= frappe.db.get_list('Membership Invoice CT',filters={'invoice': sales_invoice},fields=['parent'],as_list=False)
+			if len(membership_detail)>0:
+				membership_name=membership_detail[0].parent	
+				membership = frappe.get_doc('Membership CT',membership_name)
+				if membership:
+					args={
+					'membership_plan':membership.membership_plan or '',
+					'current_invoice_start':membership.current_invoice_start or '',
+					'current_invoice_end':membership.current_invoice_end or '',
+					'member_web_login_id':membership.member_web_login_id or '',
+					'name':membership.name or ''
+					}
+
+					no_of_sales_invoice=len(membership.get("invoices"))
+					if no_of_sales_invoice>1:
+						#renewal logic
+						send_membership_creation_renewal_sms(self,notification_name='membership_renewal',args=args)
+						send_membership_creation_renewal_email(self,notification_name='membership_renewal',args=args)
+					else:
+						#first time, active paid logic
+						send_membership_creation_renewal_sms(self,notification_name='membership_active',args=args)
+						send_membership_creation_renewal_email(self,notification_name='membership_active',args=args)
+
+def send_membership_creation_renewal_sms(self,notification_name,args):
+	alert = frappe.get_doc('SMS Notification',notification_name)
+	if alert:
+		doc=frappe.get_doc(self.doctype,self.name)
+		context = get_context(doc)
+		context = {"doc": doc, "alert": alert, "comments": None}
+		msg=frappe.render_template(alert.message,context)
+		msg=frappe.render_template(msg, args)	
+		send_sms(
+			receiver_list=alert.get_receiver_list(doc, context),
+			msg=msg
+		)	
+
+def send_membership_creation_renewal_email(self,notification_name,args):
+	alert = frappe.get_doc('Notification',notification_name)
+	if alert:
+		doc=frappe.get_doc(self.doctype,self.name)
+		context = get_context(doc)
+		context = {"doc": doc, "alert": alert, "comments": None}
+
+		from email.utils import formataddr
+		subject = alert.subject
+		if "{" in subject:
+			subject = frappe.render_template(alert.subject, context)
+
+		attachments = alert.get_attachment(doc)
+		recipients, cc, bcc = alert.get_list_of_recipients(doc, context)
+		if not (recipients or cc or bcc):
+			return
+
+		sender = None
+		if alert.sender and alert.sender_email:
+			sender = formataddr((alert.sender, alert.sender_email))
+		msg=frappe.render_template(alert.message,context)
+		msg=frappe.render_template(msg, args)				
+		frappe.sendmail(recipients = recipients,
+			subject = subject,
+			sender = sender,
+			cc = cc,
+			bcc = bcc,
+			message = msg,
+			reference_doctype = doc.doctype,
+			reference_name = doc.name,
+			attachments = attachments,
+			expose_recipients="header",
+			print_letterhead = ((attachments
+				and attachments[0].get('print_letterhead')) or False))
