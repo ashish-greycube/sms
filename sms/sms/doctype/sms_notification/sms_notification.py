@@ -475,11 +475,12 @@ def membership_creation_renewal(self,method):
 						#first time, active paid logic
 						send_membership_creation_renewal_sms(self,notification_name='membership_active',args=args)
 						send_membership_creation_renewal_email(self,notification_name='membership_active',args=args)
+					return
 
 def send_membership_creation_renewal_sms(self,notification_name,args=None):
 	if frappe.db.exists('SMS Notification',notification_name):	
 		alert = frappe.get_doc('SMS Notification',notification_name)
-		if alert:
+		if alert.enabled==1:
 			doc=frappe.get_doc(self.doctype,self.name)
 			context = get_context(doc)
 			context = {"doc": doc, "alert": alert, "comments": None}
@@ -498,7 +499,7 @@ def send_membership_creation_renewal_sms(self,notification_name,args=None):
 def send_membership_creation_renewal_email(self,notification_name,args):
 	if frappe.db.exists('Notification',notification_name):	
 		alert = frappe.get_doc('Notification',notification_name)
-		if alert:
+		if alert.enabled==1:
 			doc=frappe.get_doc(self.doctype,self.name)
 			context = get_context(doc)
 			context = {"doc": doc, "alert": alert, "comments": None}
@@ -554,6 +555,7 @@ and DATE_FORMAT(contact.birth_date_cf,'%%m-%%d') = DATE_FORMAT(%s,'%%m-%%d')
 			print(contact.name)
 			doc=frappe.get_doc('Contact',contact.name)
 			send_membership_creation_renewal_sms(doc,notification_name='birthday_reminder',args=None)
+			return
 			# 
 	contacts = frappe.db.sql("""
 select distinct(contact.name)
@@ -572,4 +574,5 @@ and DATE_FORMAT(contact.birth_date_cf,'%%m-%%d') = DATE_FORMAT(%s,'%%m-%%d')
 		for contact in contacts:
 			print(contact.name)
 			doc=frappe.get_doc('Contact',contact.name)
-			send_membership_creation_renewal_email(doc,notification_name='birthday_reminder',args=None)		
+			send_membership_creation_renewal_email(doc,notification_name='birthday_reminder',args=None)
+			return
