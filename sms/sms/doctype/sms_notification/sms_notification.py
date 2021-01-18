@@ -467,14 +467,17 @@ def membership_creation_renewal(self,method):
 					}
 
 					no_of_sales_invoice=len(membership.get("invoices"))
-					if no_of_sales_invoice>1:
+					print('no_of_sales_invoice'*100,no_of_sales_invoice)
+					if no_of_sales_invoice==1:
+						#first time, active paid logic
+						send_membership_creation_renewal_sms(self,notification_name='membership_active',args=args)
+						send_membership_creation_renewal_email(self,notification_name='membership_active',args=args)
+					elif no_of_sales_invoice>1:
 						#renewal logic
 						send_membership_creation_renewal_sms(self,notification_name='membership_renewal',args=args)
 						send_membership_creation_renewal_email(self,notification_name='membership_renewal',args=args)
 					else:
-						#first time, active paid logic
-						send_membership_creation_renewal_sms(self,notification_name='membership_active',args=args)
-						send_membership_creation_renewal_email(self,notification_name='membership_active',args=args)
+						return
 					return
 
 def send_membership_creation_renewal_sms(self,notification_name,args=None):
