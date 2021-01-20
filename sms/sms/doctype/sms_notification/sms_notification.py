@@ -553,12 +553,13 @@ and membership.status in ('Active Unpaid','Active Paid','Past Due Date','Suspend
 and contact.mobile_no is not null
 and DATE_FORMAT(contact.birth_date_cf,'%%m-%%d') = DATE_FORMAT(%s,'%%m-%%d')
 """,(todays_date),as_dict=1)
+	#print(contacts) 
 	if len(contacts)>0:
 		for contact in contacts:
-			print(contact.name)
+			#print(contact.name)
 			doc=frappe.get_doc('Contact',contact.name)
 			send_membership_creation_renewal_sms(doc,notification_name='birthday_reminder',args=None)
-			return
+			
 			# 
 	contacts = frappe.db.sql("""
 select distinct(contact.name)
@@ -573,9 +574,10 @@ and membership.status in ('Active Unpaid','Active Paid','Past Due Date','Suspend
 and contact.email_id is not null
 and DATE_FORMAT(contact.birth_date_cf,'%%m-%%d') = DATE_FORMAT(%s,'%%m-%%d')
 """,(todays_date),as_dict=1)
+	#print(contacts)
 	if len(contacts)>0:
 		for contact in contacts:
-			print(contact.name)
+			#print(contact.name)
 			doc=frappe.get_doc('Contact',contact.name)
 			send_membership_creation_renewal_email(doc,notification_name='birthday_reminder',args=None)
-			return
+			
