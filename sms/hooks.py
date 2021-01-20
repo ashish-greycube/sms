@@ -142,6 +142,25 @@ fixtures = [
       {
         "dt": "SMS Settings", 
         "filters": [["name", "in", ["SMS Settings"]]]
-      }      
-
+      },
+      {
+        "dt": "SMS Notification", 
+        "filters": [["name", "in", ["Update Your Fitness Metrics", "Reminder: Check your Blood Pressure", "Just Checking In",
+                                    "Reservation Confirmation", "Your Reservation has been Cancelled", "Your Membership has been Suspended",
+                                    "Spa Booking Confirmation", "Payment Cancellation", "Payment Receipt",
+                                    "Your Reservation has been Modified", "Your booking has been Cancelled", "Your Spa Booking has been Rescheduled",
+                                    "Your Membership is about to Expire.", "membership_renewal", "birthday_reminder",
+                                    "Welcome Letter", "membership_active"
+                    ]]]
+      },           
+      {
+        "dt": "Notification", 
+        "filters": [["name", "in", ["Payment Receipt", "Payment Cancellation", "Reminder: Check your Blood Pressure", 
+                                    "Update Your Fitness Metrics", "Just Checking In", "Reservation Confirmation",
+                                    "Your Reservation has been Cancelled", "birthday_reminder", "Your Reservation has been Modified",
+                                    "membership_active", "membership_renewal", "Your Membership has been Suspended", 
+                                    "Your Membership is about to Expire.", "Your Spa Booking has been Modified (service)", "Your booking has been Cancelled",
+                                    "Welcome letter"
+                    ]]]
+      }
 ]
