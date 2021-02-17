@@ -55,7 +55,7 @@ app_license = "MIT"
 # ------------
 
 # before_install = "sms.install.before_install"
-# after_install = "sms.install.after_install"
+after_install = "sms.install_fixtures.install_fixtures"
 
 # Desk Notifications
 # ------------------
@@ -143,16 +143,6 @@ fixtures = [
         "dt": "SMS Settings", 
         "filters": [["name", "in", ["SMS Settings"]]]
       },
-      {
-        "dt": "SMS Notification", 
-        "filters": [["name", "in", ["Update Your Fitness Metrics", "Reminder: Check your Blood Pressure", "Just Checking In",
-                                    "Reservation Confirmation", "Your Reservation has been Cancelled", "Your Membership has been Suspended",
-                                    "Spa Booking Confirmation", "Payment Cancellation", "Payment Receipt",
-                                    "Your Reservation has been Modified", "Your booking has been Cancelled", "Your Spa Booking has been Rescheduled",
-                                    "Your Membership is about to Expire.", "membership_renewal", "birthday_reminder",
-                                    "Welcome Letter", "membership_active"
-                    ]]]
-      },           
       {
         "dt": "Notification", 
         "filters": [["name", "in", ["Payment Receipt", "Payment Cancellation", "Reminder: Check your Blood Pressure", 
