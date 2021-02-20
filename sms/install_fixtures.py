@@ -9,7 +9,7 @@ from frappe.desk.page.setup_wizard.setup_wizard import make_records
 def install_fixtures():
     records = [
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
@@ -46,7 +46,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
@@ -83,7 +83,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "doc.status==\"Cancelled\" and doc.facility in ['Spa-Male','Spa-Female']",
   "date_changed": "",
@@ -120,7 +120,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
@@ -157,7 +157,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
@@ -194,7 +194,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
@@ -231,7 +231,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "doc.payment_type == \"Receive\"",
   "date_changed": "",
@@ -268,7 +268,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
@@ -305,7 +305,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "birth_date_cf",
@@ -342,7 +342,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
@@ -379,7 +379,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "current_invoice_end",
@@ -416,7 +416,7 @@ def install_fixtures():
   "value_changed": ""
  },
  {
-  "_liked_by": """",
+  "_liked_by": "",
   "channel": "SMS",
   "condition": "",
   "date_changed": "",
