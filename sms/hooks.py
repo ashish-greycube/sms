@@ -55,7 +55,7 @@ app_license = "MIT"
 # ------------
 
 # before_install = "sms.install.before_install"
-after_install = "sms.install_fixtures.install_fixtures"
+before_migrate = "sms.install_fixtures.install_fixtures"
 
 # Desk Notifications
 # ------------------
