@@ -637,3 +637,4 @@ def install_fixtures():
 ]
     
     make_records(records)
+    frappe.db.commit()
